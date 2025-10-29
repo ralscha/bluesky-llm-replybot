@@ -1,0 +1,43 @@
+[Unit]
+Description=Bluesky LLM Reply Bot
+Documentation=https://github.com/ralscha/bluesky-llm-replybot
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=bluesky
+Group=bluesky
+WorkingDirectory=/opt/bluesky-replybot
+EnvironmentFile=/opt/bluesky-replybot/.env
+
+# Wait for PostgreSQL container to be running and healthy
+ExecStartPre=/bin/bash -c 'until docker ps --filter "name=postgres" --filter "status=running" --format "{{.Names}}" | grep -q postgres; do echo "Waiting for PostgreSQL container..."; sleep 2; done'
+ExecStartPre=/bin/bash -c 'until docker exec $(docker ps --filter "name=postgres" --format "{{.Names}}" | head -n1) pg_isready -U ${DB_USER} -d ${DB_NAME}; do echo "Waiting for PostgreSQL to be ready..."; sleep 2; done'
+
+# Start the application
+ExecStart=/opt/bluesky-replybot/bin/app
+
+# Restart policy
+Restart=on-failure
+RestartSec=10s
+StartLimitInterval=5min
+StartLimitBurst=3
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/bluesky-replybot
+CapabilityBoundingSet=
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=bluesky-replybot
+
+[Install]
+WantedBy=multi-user.target

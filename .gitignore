@@ -1,0 +1,17 @@
+# PostgreSQL data directory
+.postgresql/
+
+# Binaries
+bin/
+*.exe
+
+# IDE files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
