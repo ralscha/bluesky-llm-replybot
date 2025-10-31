@@ -112,7 +112,7 @@ func (b *Bot) handleRetryableFailure(message database.ClaimNextMessageRow, error
 func (b *Bot) generateLLMResponse(userMessage string) (string, *bool, string, error) {
 	prompt := fmt.Sprintf(`You are a helpful AI assistant responding to a message on Bluesky (microblogging social media service).
 Please provide a thoughtful, engaging, and helpful response to the following user message.
-Keep your response concise and appropriate for social media (maximum 300 characters).
+Keep your response concise and appropriate for social media (maximum 500 characters).
 
 User message: 
 %s
