@@ -3,11 +3,12 @@ module github.com/ralscha/bluesky_llm_replybot
 go 1.25.3
 
 require (
-	github.com/bluesky-social/indigo v0.0.0-20251029062521-aa029b5f2ca7
+	github.com/bluesky-social/indigo v0.0.0-20251031012455-0b4bd2478a61
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/joho/godotenv v1.5.1
 	github.com/pressly/goose/v3 v3.26.0
-	google.golang.org/genai v1.32.0
+	github.com/rivo/uniseg v0.4.7
+	google.golang.org/genai v1.33.0
 )
 
 require (
@@ -30,7 +31,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/ipfs/bbloom v0.0.4 // indirect
-	github.com/ipfs/boxo v0.35.0 // indirect
+	github.com/ipfs/boxo v0.35.1 // indirect
 	github.com/ipfs/go-block-format v0.2.3 // indirect
 	github.com/ipfs/go-cid v0.6.0 // indirect
 	github.com/ipfs/go-datastore v0.9.0 // indirect

@@ -99,15 +99,33 @@ func (b *Bot) sendReply(authClient *xrpc.Client, auth *atproto.ServerCreateSessi
 		return "", "", fmt.Errorf("no LLM response available for message ID %d", message.ID)
 	}
 
+	var signature string
 	if message.ModelName != nil && *message.ModelName != "" {
-		signature := fmt.Sprintf("\n🤖 %s", *message.ModelName)
-		if len(responseText)+len(signature) <= 300 {
-			responseText += signature
-		}
+		signature = fmt.Sprintf("\n🤖 %s", *message.ModelName)
 	}
 
+	fullText := responseText
+	if signature != "" {
+		fullText += signature
+	}
+
+	const maxGraphemes = 300
+	graphemeCount := countGraphemes(fullText)
+
+	if graphemeCount <= maxGraphemes {
+		return b.sendSinglePost(authClient, auth, message, fullText)
+	}
+
+	if signature != "" && countGraphemes(responseText) <= maxGraphemes {
+		return b.sendSinglePost(authClient, auth, message, responseText)
+	}
+
+	return b.sendThreadedReply(authClient, auth, message, responseText, signature)
+}
+
+func (b *Bot) sendSinglePost(authClient *xrpc.Client, auth *atproto.ServerCreateSession_Output, message database.GetReadyToSendMessagesRow, text string) (string, string, error) {
 	replyRecord := bsky.FeedPost{
-		Text:      responseText,
+		Text:      text,
 		CreatedAt: time.Now().UTC().Format(time.RFC3339),
 		Reply: &bsky.FeedPost_ReplyRef{
 			Root: &atproto.RepoStrongRef{
@@ -141,6 +159,81 @@ func (b *Bot) sendReply(authClient *xrpc.Client, auth *atproto.ServerCreateSessi
 	}
 
 	return resp.Uri, resp.Cid, nil
+}
+
+func (b *Bot) sendThreadedReply(authClient *xrpc.Client, auth *atproto.ServerCreateSession_Output, message database.GetReadyToSendMessagesRow, responseText, signature string) (string, string, error) {
+	const maxGraphemes = 280
+
+	chunks := splitTextIntoChunks(responseText, maxGraphemes)
+
+	if signature != "" {
+		lastChunk := chunks[len(chunks)-1]
+		if countGraphemes(lastChunk+signature) <= 300 {
+			chunks[len(chunks)-1] = lastChunk + signature
+		}
+	}
+
+	rootURI := message.MessageUri
+	rootCID := message.MessageCid
+	parentURI := message.MessageUri
+	parentCID := message.MessageCid
+
+	var firstPostURI, firstPostCID string
+
+	for i, chunk := range chunks {
+		replyRecord := bsky.FeedPost{
+			Text:      chunk,
+			CreatedAt: time.Now().UTC().Format(time.RFC3339),
+			Reply: &bsky.FeedPost_ReplyRef{
+				Root: &atproto.RepoStrongRef{
+					Uri: rootURI,
+					Cid: rootCID,
+				},
+				Parent: &atproto.RepoStrongRef{
+					Uri: parentURI,
+					Cid: parentCID,
+				},
+			},
+		}
+
+		encodedRecord := &util.LexiconTypeDecoder{Val: &replyRecord}
+
+		ctx, cancel := context.WithTimeout(b.ctx, 30*time.Second)
+		resp, err := atproto.RepoCreateRecord(
+			ctx,
+			authClient,
+			&atproto.RepoCreateRecord_Input{
+				Repo:       auth.Did,
+				Collection: "app.bsky.feed.post",
+				Record:     encodedRecord,
+			},
+		)
+		cancel()
+
+		if err != nil {
+			return firstPostURI, firstPostCID, fmt.Errorf("failed to send chunk %d/%d: %w", i+1, len(chunks), err)
+		}
+
+		b.logger.Info("Sent reply chunk",
+			"message_id", message.ID,
+			"chunk", i+1,
+			"total", len(chunks),
+			"graphemes", countGraphemes(chunk))
+
+		if i == 0 {
+			firstPostURI = resp.Uri
+			firstPostCID = resp.Cid
+		}
+
+		parentURI = resp.Uri
+		parentCID = resp.Cid
+
+		if i < len(chunks)-1 {
+			time.Sleep(1 * time.Second)
+		}
+	}
+
+	return firstPostURI, firstPostCID, nil
 }
 
 func (b *Bot) finalizeMessage(message database.GetReadyToSendMessagesRow, replyURI, replyCID, status string, errorMessage *string) {
