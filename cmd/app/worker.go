@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -174,14 +175,14 @@ User message:
 			continue
 		}
 
-		var responseText string
+		var responseText strings.Builder
 		for _, part := range candidate.Content.Parts {
 			if part.Text != "" {
-				responseText += part.Text
+				responseText.WriteString(part.Text)
 			}
 		}
 
-		if responseText == "" {
+		if responseText.String() == "" {
 			b.logger.Warn("Received empty response from model", "model", model)
 			continue
 		}
@@ -191,7 +192,7 @@ User message:
 			tokensUsed = int(resp.UsageMetadata.TotalTokenCount)
 		} else {
 			// Fallback if usage metadata is not available
-			tokensUsed = (len(prompt) + len(responseText)) / 4
+			tokensUsed = (len(prompt) + len(responseText.String())) / 4
 		}
 
 		b.rateLimiter.RecordRequest(model, tokensUsed)
@@ -200,7 +201,7 @@ User message:
 			b.rateLimiter.RecordGrounding(model, "google_search")
 		}
 
-		return responseText, &enableGoogleSearch, model, nil
+		return responseText.String(), &enableGoogleSearch, model, nil
 	}
 
 	return "", nil, "", fmt.Errorf("failed to generate response: all models exhausted or rate limited")
