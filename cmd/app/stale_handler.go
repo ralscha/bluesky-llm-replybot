@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"time"
+
+	database "github.com/ralscha/bluesky_llm_replybot/internal/database/generated"
 )
 
 func (b *Bot) runStaleMessageHandler() {
@@ -34,6 +36,23 @@ func (b *Bot) handleStaleMessages() error {
 		b.logger.Warn("Resetting stale message",
 			"message_id", message.ID,
 			"retry_count", message.RetryCount)
+
+		currentRetryCount := int32(0)
+		if message.RetryCount != nil {
+			currentRetryCount = *message.RetryCount
+		}
+
+		if currentRetryCount+1 >= int32(b.maxRetries) {
+			if err := b.queries.UpdateMessageWithLLMResponse(b.ctx, database.UpdateMessageWithLLMResponseParams{
+				ID:          message.ID,
+				LlmResponse: new(fallbackResponseText),
+			}); err != nil {
+				b.logger.Error("Failed to update stale message with fallback response",
+					"message_id", message.ID,
+					"error", err)
+			}
+			continue
+		}
 
 		if err := b.queries.ResetStaleMessage(b.ctx, message.ID); err != nil {
 			b.logger.Error("Failed to reset stale message",

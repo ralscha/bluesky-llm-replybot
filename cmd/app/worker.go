@@ -12,6 +12,8 @@ import (
 	database "github.com/ralscha/bluesky_llm_replybot/internal/database/generated"
 )
 
+const fallbackResponseText = "I apologize, but I'm unable to generate a response at this time. Please try again later."
+
 func (b *Bot) runWorker(config *Config) {
 	b.logger.Info("Starting worker...")
 
@@ -80,11 +82,9 @@ func (b *Bot) handleMaxRetriesReached(message database.ClaimNextMessageRow) erro
 		"message_id", message.ID,
 		"retry_count", message.RetryCount)
 
-	fallbackResponse := "I apologize, but I'm unable to generate a response at this time. Please try again later."
-
 	if updateErr := b.queries.UpdateMessageWithLLMResponse(b.ctx, database.UpdateMessageWithLLMResponseParams{
 		ID:          message.ID,
-		LlmResponse: &fallbackResponse,
+		LlmResponse: new(fallbackResponseText),
 	}); updateErr != nil {
 		b.logger.Error("Failed to update message with fallback response",
 			"message_id", message.ID,

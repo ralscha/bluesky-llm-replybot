@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"net"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -39,8 +41,7 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("all database environment variables (DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME, DB_SSLMODE) are required")
 	}
 
-	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
-		dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
+	dbURL := buildDatabaseURL(dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
 
 	blueskyIdentifier := os.Getenv("BLUESKY_IDENTIFIER")
 	blueskyPassword := os.Getenv("BLUESKY_PASSWORD")
@@ -79,4 +80,19 @@ func LoadConfig() (*Config, error) {
 	}
 
 	return config, nil
+}
+
+func buildDatabaseURL(dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode string) string {
+	u := &url.URL{
+		Scheme: "postgres",
+		User:   url.UserPassword(dbUser, dbPassword),
+		Host:   net.JoinHostPort(dbHost, dbPort),
+		Path:   dbName,
+	}
+
+	query := u.Query()
+	query.Set("sslmode", dbSSLMode)
+	u.RawQuery = query.Encode()
+
+	return u.String()
 }

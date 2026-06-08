@@ -1,14 +1,14 @@
 module github.com/ralscha/bluesky_llm_replybot
 
-go 1.26.3
+go 1.26.4
 
 require (
-	github.com/bluesky-social/indigo v0.0.0-20260529183052-5368f55344e0
-	github.com/jackc/pgx/v5 v5.9.2
+	github.com/bluesky-social/indigo v0.0.0-20260605210604-af2fec94f34c
+	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
 	github.com/pressly/goose/v3 v3.27.1
 	github.com/rivo/uniseg v0.4.7
-	google.golang.org/genai v1.58.0
+	google.golang.org/genai v1.59.0
 )
 
 require (
@@ -76,7 +76,7 @@ require (
 	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
-	google.golang.org/api v0.282.0 // indirect
+	google.golang.org/api v0.283.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 	google.golang.org/grpc v1.81.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
