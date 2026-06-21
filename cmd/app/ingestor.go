@@ -18,6 +18,10 @@ func (b *Bot) runIngestor(config *Config) {
 	ticker := time.NewTicker(config.IngestorInterval)
 	defer ticker.Stop()
 
+	if err := b.ingestNotifications(config); err != nil {
+		b.logger.Error("Error ingesting notifications", "error", err)
+	}
+
 	for {
 		select {
 		case <-b.ingestorCtx.Done():

@@ -10,20 +10,18 @@ CREATE TABLE message_queue (
     message_text TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     processing_started_at TIMESTAMPTZ,
-    completed_at TIMESTAMPTZ,
-    retry_count INT DEFAULT 0,
-    error_message TEXT,
+    retry_count INT NOT NULL DEFAULT 0,
     llm_response TEXT,
-    used_google_search_grounding BOOLEAN,
-    model_name TEXT
+    model_name TEXT,
+    deferred_until TIMESTAMPTZ,
+    spending_notice_sent BOOLEAN NOT NULL DEFAULT FALSE
 );
 
--- Index for efficient queue processing
 CREATE INDEX idx_status_created ON message_queue (status, created_at);
-
--- Index for processing queries
-CREATE INDEX idx_processing ON message_queue (processing_started_at) 
+CREATE INDEX idx_processing ON message_queue (processing_started_at)
     WHERE status = 'processing';
+CREATE INDEX idx_message_queue_deferred_until ON message_queue (deferred_until)
+    WHERE deferred_until IS NOT NULL;
 
 -- +goose StatementEnd
 

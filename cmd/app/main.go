@@ -6,8 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	"google.golang.org/genai"
 )
 
 func main() {
@@ -22,12 +20,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	geminiAPIKey := os.Getenv("GEMINI_API_KEY")
-	if geminiAPIKey == "" {
-		logger.Error("GEMINI_API_KEY environment variable is required")
-		os.Exit(1)
-	}
-
 	pool, err := initDatabase(config.DatabaseURL, logger)
 	if err != nil {
 		logger.Error("Failed to initialize database", "error", err)
@@ -35,15 +27,15 @@ func main() {
 	}
 	defer pool.Close()
 
-	genaiClient, err := genai.NewClient(context.Background(), &genai.ClientConfig{
-		APIKey: geminiAPIKey,
-	})
+	chatModel, err := NewChatModel(context.Background(), config.ChatModel)
 	if err != nil {
-		logger.Error("Failed to initialize Google GenAI client", "error", err)
+		logger.Error("Failed to initialize chat model", "error", err)
 		os.Exit(1)
 	}
 
-	bot := NewBot(pool, genaiClient, config.BotHandle, config.MaxRetries, logger)
+	spendingLimiter := NewSpendingLimiter(pool, config.UsagePricing, config.DailySpendingLimit)
+	requestLimiter := NewRequestLimiter(config.LLMRequestsPerMinute)
+	bot := NewBot(pool, chatModel, config.ChatModel.Model, config.ChatModel.MaxOutputTokens, spendingLimiter, requestLimiter, config.BotHandle, config.MaxRetries, logger)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)

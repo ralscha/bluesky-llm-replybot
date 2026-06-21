@@ -6,45 +6,51 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cloudwego/eino/components/model"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"google.golang.org/genai"
 
 	database "github.com/ralscha/bluesky_llm_replybot/internal/database/generated"
 )
 
 type Bot struct {
-	ctx            context.Context
-	cancel         context.CancelFunc
-	ingestorCtx    context.Context
-	ingestorCancel context.CancelFunc
-	wg             sync.WaitGroup
-	pool           *pgxpool.Pool
-	queries        *database.Queries
-	genaiClient    *genai.Client
-	rateLimiter    *RateLimiter
-	botHandle      string
-	maxRetries     int
-	logger         *slog.Logger
+	ctx             context.Context
+	cancel          context.CancelFunc
+	ingestorCtx     context.Context
+	ingestorCancel  context.CancelFunc
+	wg              sync.WaitGroup
+	pool            *pgxpool.Pool
+	queries         *database.Queries
+	chatModel       model.BaseChatModel
+	llmModelName    string
+	maxOutputTokens int
+	spendingLimiter *SpendingLimiter
+	requestLimiter  *RequestLimiter
+	botHandle       string
+	maxRetries      int
+	logger          *slog.Logger
 }
 
-func NewBot(pool *pgxpool.Pool, genaiClient *genai.Client, botHandle string, maxRetries int, logger *slog.Logger) *Bot {
+func NewBot(pool *pgxpool.Pool, chatModel model.BaseChatModel, llmModelName string, maxOutputTokens int, spendingLimiter *SpendingLimiter, requestLimiter *RequestLimiter, botHandle string, maxRetries int, logger *slog.Logger) *Bot {
 	ctx, cancel := context.WithCancel(context.Background())
 	ingestorCtx, ingestorCancel := context.WithCancel(ctx)
 
 	queries := database.New(pool)
 
 	return &Bot{
-		ctx:            ctx,
-		cancel:         cancel,
-		ingestorCtx:    ingestorCtx,
-		ingestorCancel: ingestorCancel,
-		pool:           pool,
-		queries:        queries,
-		genaiClient:    genaiClient,
-		rateLimiter:    NewRateLimiter(ctx, queries, logger),
-		botHandle:      botHandle,
-		maxRetries:     maxRetries,
-		logger:         logger,
+		ctx:             ctx,
+		cancel:          cancel,
+		ingestorCtx:     ingestorCtx,
+		ingestorCancel:  ingestorCancel,
+		pool:            pool,
+		queries:         queries,
+		chatModel:       chatModel,
+		llmModelName:    llmModelName,
+		maxOutputTokens: maxOutputTokens,
+		spendingLimiter: spendingLimiter,
+		requestLimiter:  requestLimiter,
+		botHandle:       botHandle,
+		maxRetries:      maxRetries,
+		logger:          logger,
 	}
 }
 

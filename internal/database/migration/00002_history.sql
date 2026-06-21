@@ -13,7 +13,6 @@ CREATE TABLE message_history (
     status VARCHAR(20) NOT NULL,
     retry_count INT DEFAULT 0,
     error_message TEXT,
-    used_google_search_grounding BOOLEAN,
     model_name TEXT,
     received_at TIMESTAMPTZ NOT NULL,
     processing_started_at TIMESTAMPTZ,

@@ -11,11 +11,10 @@ INSERT INTO message_history (
     status,
     retry_count,
     error_message,
-    used_google_search_grounding,
     model_name,
     received_at,
     processing_started_at,
     completed_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW()
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW()
 ) RETURNING *;

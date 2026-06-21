@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -112,29 +113,12 @@ func addContinuationMarkers(chunks []string) []string {
 
 	for i, chunk := range chunks {
 		partNum := i + 1
-		switch partNum {
-		case 1:
-			marked[i] = strings.TrimSpace(chunk) + " (1/" + intToString(total) + ")"
-		case total:
-			marked[i] = "…(" + intToString(partNum) + "/" + intToString(total) + ") " + strings.TrimSpace(chunk)
-		default:
-			marked[i] = "…(" + intToString(partNum) + "/" + intToString(total) + ") " + strings.TrimSpace(chunk)
+		if partNum == 1 {
+			marked[i] = strings.TrimSpace(chunk) + " (1/" + strconv.Itoa(total) + ")"
+			continue
 		}
+		marked[i] = "...(" + strconv.Itoa(partNum) + "/" + strconv.Itoa(total) + ") " + strings.TrimSpace(chunk)
 	}
 
 	return marked
-}
-
-func intToString(n int) string {
-	if n == 0 {
-		return "0"
-	}
-
-	var digits []byte
-	for n > 0 {
-		digits = append([]byte{byte('0' + n%10)}, digits...)
-		n /= 10
-	}
-
-	return string(digits)
 }

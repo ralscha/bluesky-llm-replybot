@@ -29,7 +29,7 @@ tasks:
   sqlc:generate:
     desc: Generate Go code from SQL queries using sqlc in Docker
     cmds:
-      - docker run --rm -v "${PWD}:/src" -w /src sqlc/sqlc:1.30.0 generate
+      - docker run --rm -v "${PWD}:/src" -w /src sqlc/sqlc:1.31.1 generate
 
   # Build tasks
   build:
@@ -72,3 +72,4 @@ tasks:
         platforms: [linux, darwin]
       - cmd: powershell -NoProfile -Command "Remove-Item -Recurse -Force bin -ErrorAction SilentlyContinue"
         platforms: [windows]
+

@@ -13,6 +13,10 @@ func (b *Bot) runStaleMessageHandler() {
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 
+	if err := b.handleStaleMessages(); err != nil {
+		b.logger.Error("Error handling stale messages", "error", err)
+	}
+
 	for {
 		select {
 		case <-b.ctx.Done():
@@ -37,10 +41,7 @@ func (b *Bot) handleStaleMessages() error {
 			"message_id", message.ID,
 			"retry_count", message.RetryCount)
 
-		currentRetryCount := int32(0)
-		if message.RetryCount != nil {
-			currentRetryCount = *message.RetryCount
-		}
+		currentRetryCount := message.RetryCount
 
 		if currentRetryCount+1 >= int32(b.maxRetries) {
 			if err := b.queries.UpdateMessageWithLLMResponse(b.ctx, database.UpdateMessageWithLLMResponseParams{

@@ -19,6 +19,10 @@ func (b *Bot) runReplySender(config *Config) {
 	ticker := time.NewTicker(config.ReplySenderInterval)
 	defer ticker.Stop()
 
+	if err := b.sendPendingReplies(config); err != nil {
+		b.logger.Error("Error sending pending replies", "error", err)
+	}
+
 	for {
 		select {
 		case <-b.ctx.Done():
@@ -61,22 +65,14 @@ func (b *Bot) sendPendingReplies(config *Config) error {
 				"message_id", message.ID,
 				"error", err)
 
-			errorMsg := err.Error()
-			maxRetries := int32(b.maxRetries)
-			if updateErr := b.queries.UpdateMessageFailed(b.ctx, database.UpdateMessageFailedParams{
-				ID:           message.ID,
-				RetryCount:   &maxRetries,
-				ErrorMessage: &errorMsg,
-			}); updateErr != nil {
-				b.logger.Error("Failed to update message as failed",
-					"message_id", message.ID,
-					"error", updateErr)
-			}
-
-			b.finalizeMessage(message, replyURI, replyCID, "failed", &errorMsg)
+			b.handleReplySendFailure(message, replyURI, replyCID, err)
 		} else {
 			b.logger.Info("Successfully sent reply", "message_id", message.ID)
-			b.finalizeMessage(message, replyURI, replyCID, "completed", nil)
+			if message.SpendingNoticeSent && message.DeferredUntil.Valid {
+				b.markDeferredNoticeSent(message)
+			} else {
+				b.finalizeMessage(message, replyURI, replyCID, "completed", nil)
+			}
 		}
 
 		select {
@@ -91,6 +87,36 @@ func (b *Bot) sendPendingReplies(config *Config) error {
 	return nil
 }
 
+func (b *Bot) markDeferredNoticeSent(message database.GetReadyToSendMessagesRow) {
+	if err := b.queries.MarkDeferredNoticeSent(b.ctx, message.ID); err != nil {
+		b.logger.Error("Failed to mark deferred spending notice as sent",
+			"message_id", message.ID,
+			"error", err)
+		return
+	}
+
+	b.logger.Info("Sent spending-limit notice; message remains deferred",
+		"message_id", message.ID,
+		"deferred_until", message.DeferredUntil.Time.Format(time.RFC3339))
+}
+func (b *Bot) handleReplySendFailure(message database.GetReadyToSendMessagesRow, replyURI, replyCID string, err error) {
+	errorMsg := err.Error()
+	maxRetries := int32(b.maxRetries)
+	if updateErr := b.queries.UpdateReadyToSendMessageFailed(b.ctx, database.UpdateReadyToSendMessageFailedParams{
+		ID:         message.ID,
+		RetryCount: maxRetries,
+	}); updateErr != nil {
+		b.logger.Error("Failed to update message as failed",
+			"message_id", message.ID,
+			"error", updateErr)
+	}
+
+	currentRetryCount := message.RetryCount
+	if currentRetryCount+1 >= int32(b.maxRetries) {
+		b.finalizeMessage(message, replyURI, replyCID, "failed", &errorMsg)
+	}
+}
+
 func (b *Bot) sendReply(authClient *xrpc.Client, auth *atproto.ServerCreateSession_Output, message database.GetReadyToSendMessagesRow) (string, string, error) {
 	var responseText string
 	if message.LlmResponse != nil {
@@ -101,7 +127,7 @@ func (b *Bot) sendReply(authClient *xrpc.Client, auth *atproto.ServerCreateSessi
 
 	var signature string
 	if message.ModelName != nil && *message.ModelName != "" {
-		signature = fmt.Sprintf("\n🤖 %s", *message.ModelName)
+		signature = fmt.Sprintf("\nAI: %s", *message.ModelName)
 	}
 
 	fullText := responseText
@@ -272,21 +298,20 @@ func (b *Bot) insertMessageHistory(message database.GetReadyToSendMessagesRow, r
 	}
 
 	_, err := b.queries.InsertMessageHistory(b.ctx, database.InsertMessageHistoryParams{
-		MessageUri:                message.MessageUri,
-		MessageCid:                message.MessageCid,
-		AuthorDid:                 message.AuthorDid,
-		AuthorHandle:              message.AuthorHandle,
-		MessageText:               message.MessageText,
-		LlmResponse:               llmResponse,
-		ReplyUri:                  replyURIPtr,
-		ReplyCid:                  replyCIDPtr,
-		Status:                    status,
-		RetryCount:                nil,
-		ErrorMessage:              errorMessage,
-		UsedGoogleSearchGrounding: message.UsedGoogleSearchGrounding,
-		ModelName:                 message.ModelName,
-		ReceivedAt:                message.CreatedAt,
-		ProcessingStartedAt:       message.ProcessingStartedAt,
+		MessageUri:          message.MessageUri,
+		MessageCid:          message.MessageCid,
+		AuthorDid:           message.AuthorDid,
+		AuthorHandle:        message.AuthorHandle,
+		MessageText:         message.MessageText,
+		LlmResponse:         llmResponse,
+		ReplyUri:            replyURIPtr,
+		ReplyCid:            replyCIDPtr,
+		Status:              status,
+		RetryCount:          &message.RetryCount,
+		ErrorMessage:        errorMessage,
+		ModelName:           message.ModelName,
+		ReceivedAt:          message.CreatedAt,
+		ProcessingStartedAt: message.ProcessingStartedAt,
 	})
 
 	return err
