@@ -3,12 +3,12 @@ module github.com/ralscha/bluesky_llm_replybot
 go 1.26.4
 
 require (
-	github.com/bluesky-social/indigo v0.0.0-20260611225325-d538a9c1096f
-	github.com/cloudwego/eino v0.9.10
+	github.com/bluesky-social/indigo v0.0.0-20260629160527-dfe5578fd537
+	github.com/cloudwego/eino v0.9.12
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.13
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/pressly/goose/v3 v3.27.1
+	github.com/pressly/goose/v3 v3.27.2
 	github.com/rivo/uniseg v0.4.7
 )
 
@@ -51,7 +51,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
 	github.com/mailru/easyjson v0.9.2 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/meguminnnnnnnnn/go-openai v0.1.5 // indirect
