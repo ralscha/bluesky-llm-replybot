@@ -51,8 +51,7 @@ func (b *Bot) processNextMessage() error {
 
 	response, modelName, err := b.generateLLMResponse(message.MessageText)
 	if err != nil {
-		var spendingErr *SpendingLimitExceededError
-		if errors.As(err, &spendingErr) {
+		if spendingErr, ok := errors.AsType[*SpendingLimitExceededError](err); ok {
 			return b.deferAfterSpendingLimit(message.ID, spendingErr.Status)
 		}
 		return b.handleLLMGenerationError(message, err)
