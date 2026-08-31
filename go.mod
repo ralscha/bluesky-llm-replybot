@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/bluesky-social/indigo v0.0.0-20260826171833-0ae16078d6a6
-	github.com/cloudwego/eino v0.9.17
+	github.com/cloudwego/eino v0.9.18
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.13
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
