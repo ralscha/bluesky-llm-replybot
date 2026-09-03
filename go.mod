@@ -1,14 +1,14 @@
 module github.com/ralscha/bluesky_llm_replybot
 
-go 1.27.0
+go 1.27.1
 
 require (
-	github.com/bluesky-social/indigo v0.0.0-20260826171833-0ae16078d6a6
-	github.com/cloudwego/eino v0.9.18
+	github.com/bluesky-social/indigo v0.0.0-20260903071738-838c39be2797
+	github.com/cloudwego/eino v0.9.19
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.13
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/pressly/goose/v3 v3.27.3
+	github.com/pressly/goose/v3 v3.28.0
 	github.com/rivo/uniseg v0.4.7
 )
 
@@ -87,7 +87,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	golang.org/x/arch v0.30.0 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/crypto v0.56.0 // indirect
 	golang.org/x/exp v0.0.0-20260824195058-e88cd73687aa // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
