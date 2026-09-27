@@ -3,7 +3,7 @@ module github.com/ralscha/bluesky_llm_replybot
 go 1.27.1
 
 require (
-	github.com/bluesky-social/indigo v0.0.0-20260923015522-dbcca561c703
+	github.com/bluesky-social/indigo v0.0.0-20260925062619-162dca49278b
 	github.com/cloudwego/eino v0.9.21
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.13
 	github.com/jackc/pgx/v5 v5.11.0

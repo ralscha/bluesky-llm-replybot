@@ -3,8 +3,8 @@ github.com/airbrake/gobrake v3.6.1+incompatible/go.mod h1:wM4gu3Cn0W0K7GUuVWnlXZ
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
 github.com/bahlo/generic-list-go v0.2.0/go.mod h1:2KvAjgMlE5NNynlg/5iLrrCCZ2+5xWbdbCW3pNTGyYg=
 github.com/bitly/go-simplejson v0.5.0/go.mod h1:cXHtHw4XUPsvGaxgjIAn8PhEWG9NfngEKAMDJEczWVA=
-github.com/bluesky-social/indigo v0.0.0-20260923015522-dbcca561c703 h1:CKO1+9flqS2kzeSsqMNTuzKsuea13PoJ6a/SxPqcc8w=
-github.com/bluesky-social/indigo v0.0.0-20260923015522-dbcca561c703/go.mod h1:bk7Iov9BLiWQmoHNwOSE6EVwSqQypZ6TYWsIu2EThGk=
+github.com/bluesky-social/indigo v0.0.0-20260925062619-162dca49278b h1:4EdQjuqOr1DTVMJGnB0GxKysVpR61ge9jUH9ld19/UU=
+github.com/bluesky-social/indigo v0.0.0-20260925062619-162dca49278b/go.mod h1:JfOxJR/TXBUxnT9ywiBnXDt/Uby5bwcq9re38wg9IEw=
 github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dRnpXw/yCqJaO+ZrUyxD+3VXMFFr56k5XYrpB4=
 github.com/buger/jsonparser v1.6.1 h1:I0phFv0PlbLHnM7TZAVjZ2MJ2/eWRTDyuO7GLR98IEs=
 github.com/buger/jsonparser v1.6.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
