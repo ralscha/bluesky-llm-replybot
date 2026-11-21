@@ -3,7 +3,7 @@ module github.com/ralscha/bluesky_llm_replybot
 go 1.27.4
 
 require (
-	github.com/bluesky-social/indigo v0.0.0-20261115223828-a39b2f94d516
+	github.com/bluesky-social/indigo v0.0.0-20261119180653-8ed9557b157a
 	github.com/cloudwego/eino v0.9.23
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.13
 	github.com/jackc/pgx/v5 v5.13.0
@@ -78,7 +78,7 @@ require (
 	github.com/whyrusleeping/cbor-gen v0.3.1 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/yargevad/filepathx v1.0.0 // indirect
-	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	go.opentelemetry.io/auto/sdk v1.2.2 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 // indirect
 	go.opentelemetry.io/otel v1.47.0 // indirect
 	go.opentelemetry.io/otel/log v1.47.0 // indirect
@@ -89,11 +89,11 @@ require (
 	go.uber.org/zap v1.28.0 // indirect
 	golang.org/x/arch v0.33.0 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
-	golang.org/x/exp v0.0.0-20261113113407-e3970619a1a4 // indirect
+	golang.org/x/exp v0.0.0-20261120182113-8801fbdfac81 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	lukechampine.com/blake3 v1.4.1 // indirect
+	lukechampine.com/blake3 v1.5.1 // indirect
 )
